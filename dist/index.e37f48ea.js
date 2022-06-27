@@ -533,12 +533,29 @@ function hmrAcceptRun(bundle, id) {
 
 },{}],"aenu9":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-var _esArrayIncludesJs = require("core-js/modules/es.array.includes.js");
+var _esArrayIncludesJs = require("core-js/modules/es.array.includes.js"); // const sRecipe = async () => {
+ //   try {
+ //     const id = window.location.hash.slice(1);
+ //     if (!id) return;
+ //     recipeV.showSpinner();
+ //     //loading recipe API
+ //     await model.loadRecipe(id);
+ //     //Rendering the Recipe
+ //     recipeV.render(model.mystate.recipe);
+ //   } catch (error) {
+ //     alert(error);
+ //   }
+ // };
+ // // window.addEventListener('hashchange', sRecipe);
+ // // window.addEventListener('load', sRecipe);
+ // ['load', 'hashchange'].forEach(ev => window.addEventListener(ev, sRecipe));
 var _webImmediateJs = require("core-js/modules/web.immediate.js");
 var _runtime = require("regenerator-runtime/runtime");
-var _module = require("./module");
-var _recipe = require("./views/recipe");
-var _recipeDefault = parcelHelpers.interopDefault(_recipe);
+var _iconsSvg = require("../img/icons.svg");
+var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
+var _fractional = require("fractional");
+// import * as model from './module';
+// import recipeV from './views/recipe';
 const recipeContainer = document.querySelector(".recipe");
 const timeout = function(s) {
     return new Promise(function(_, reject) {
@@ -549,58 +566,140 @@ const timeout = function(s) {
 };
 // https://forkify-api.herokuapp.com/v2
 ///////////////////////////////////////
-const sRecipe = async ()=>{
+const spinner = (parentEl)=>{
+    const html = `
+    <div class="spinner">
+              <svg>
+                <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
+              </svg>
+            </div>
+    `;
+    parentEl.innerHtml = "";
+    parentEl.insertAdjacentHTML("afterbegin", html);
+};
+const showRecipe = async ()=>{
     try {
-        const id = window.location.hash;
-        if (!id) return;
-        (0, _recipeDefault.default).showSpinner();
-        //loading recipe API
-        await (0, _module.loadRecipe)(id);
-        await (0, _module.mystate)(id);
-        //Rendering the Recipe
-        (0, _recipeDefault.default).render((0, _module.mystate).recipe);
-    } catch (error) {
-        alert(error);
+        spinner(recipeContainer);
+        // loading API
+        const recipe = await fetch(`https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886`);
+        const ourRecipe = await recipe.json();
+        if (!recipe.ok) throw new Error(`${ourRecipe.message} (${recipe.status})`);
+        console.log(recipe);
+        console.log(ourRecipe);
+        let res = ourRecipe.data.recipe;
+        res = {
+            id: res.id,
+            title: res.title,
+            publisher: res.publisher,
+            sourceUrl: res.source_url,
+            image: res.image_url,
+            servings: res.servings,
+            cookingTime: res.cooking_time,
+            ingredients: res.ingredients
+        };
+        console.log(res);
+        //RENDERING THE RECIPE
+        const html = `
+    <figure class="recipe__fig">
+         <img src="${res.image}" alt="${res.title}" class="recipe__img" />
+              <h1 class="recipe__title">
+                <span>${res.title}</span>
+              </h1>
+            </figure>
+    
+            <div class="recipe__details">
+              <div class="recipe__info">
+                <svg class="recipe__info-icon">
+                  <use href="${(0, _iconsSvgDefault.default)}#icon-clock"></use>
+                </svg>
+                <span class="recipe__info-data recipe__info-data--minutes">${res.cookingTime}</span>
+                <span class="recipe__info-text">minutes</span>
+              </div>
+              <div class="recipe__info">
+                <svg class="recipe__info-icon">
+                  <use href="${(0, _iconsSvgDefault.default)}#icon-users"></use>
+                </svg>
+                <span class="recipe__info-data recipe__info-data--people">${res.servings}</span>
+                <span class="recipe__info-text">servings</span>
+    
+                <div class="recipe__info-buttons">
+                  <button class="btn--tiny btn--increase-servings">
+                    <svg>
+                      <use href="${(0, _iconsSvgDefault.default)}#icon-minus-circle"></use>
+                    </svg>
+                  </button>
+                  <button class="btn--tiny btn--increase-servings">
+                    <svg>
+                      <use href="${(0, _iconsSvgDefault.default)}#icon-plus-circle"></use>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+    
+              <div class="recipe__user-generated">
+                <svg>
+                  <use href="${(0, _iconsSvgDefault.default)}#icon-user"></use>
+                </svg>
+              </div>
+              <button class="btn--round">
+                <svg class="">
+                  <use href="${(0, _iconsSvgDefault.default)}#icon-bookmark-fill"></use>
+                </svg>
+              </button>
+            </div>
+    
+            <div class="recipe__ingredients">
+              <h2 class="heading--2">Recipe ingredients</h2>
+              <ul class="recipe__ingredient-list">
+              ${res.ingredients.map((ing)=>{
+            return `
+              <li class="recipe__ingredient">
+       <svg class="recipe__icon">
+         <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
+       </svg>
+       <div class="recipe__quantity">${ing.quantity ? new (0, _fractional.Fraction)(ing.quantity).toString() : ""}</div>
+       <div class="recipe__description">
+         <span class="recipe__unit">${ing.unit}</span>
+        ${ing.description}
+       </div>
+ </li>
+              `;
+        }).join("")}
+              </ul>
+            </div>
+    
+            <div class="recipe__directions">
+              <h2 class="heading--2">How to cook it</h2>
+              <p class="recipe__directions-text">
+                This recipe was carefully designed and tested by
+                <span class="recipe__publisher">${res.publisher}</span>. Please check out
+                directions at their website.
+              </p>
+              <a
+                class="btn--small recipe__btn"
+                href="${res.sourceUrl}"
+                target="_blank"
+              >
+                <span>Directions</span>
+                <svg class="search__icon">
+                  <use href="${(0, _iconsSvgDefault.default)}#icon-arrow-right"></use>
+                </svg>
+              </a>
+            </div>
+        `;
+        recipeContainer.innerHTML = "";
+        recipeContainer.insertAdjacentHTML("afterbegin", html);
+    } catch (err) {
+        alert(err);
+        console.log(err);
     }
 };
-// window.addEventListener('hashchange', sRecipe);
-// window.addEventListener('load', sRecipe);
 [
     "load",
     "hashchange"
 ].forEach((ev)=>window.addEventListener(ev, sRecipe));
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","core-js/modules/es.array.includes.js":"dkJzX","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime/runtime":"dXNgZ","./module":"Qr6Q3","./views/recipe":"dRlYE"}],"gkKU3":[function(require,module,exports) {
-exports.interopDefault = function(a) {
-    return a && a.__esModule ? a : {
-        default: a
-    };
-};
-exports.defineInteropFlag = function(a) {
-    Object.defineProperty(a, "__esModule", {
-        value: true
-    });
-};
-exports.exportAll = function(source, dest) {
-    Object.keys(source).forEach(function(key) {
-        if (key === "default" || key === "__esModule" || dest.hasOwnProperty(key)) return;
-        Object.defineProperty(dest, key, {
-            enumerable: true,
-            get: function() {
-                return source[key];
-            }
-        });
-    });
-    return dest;
-};
-exports.export = function(dest, destName, get) {
-    Object.defineProperty(dest, destName, {
-        enumerable: true,
-        get: get
-    });
-};
-
-},{}],"dkJzX":[function(require,module,exports) {
+},{"core-js/modules/es.array.includes.js":"dkJzX","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../img/icons.svg":"cMpiy","fractional":"3SU56"}],"dkJzX":[function(require,module,exports) {
 "use strict";
 var $ = require("../internals/export");
 var $includes = require("../internals/array-includes").includes;
@@ -2402,160 +2501,37 @@ try {
     else Function("r", "regeneratorRuntime = r")(runtime);
 }
 
-},{}],"Qr6Q3":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "mystate", ()=>mystate);
-parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
-const mystate = {
-    recipe: {}
-};
-const loadRecipe = async (id)=>{
-    try {
-        const recipe = await fetch(`https://forkify-api.herokuapp.com/api/v2/recipes/${id}`);
-        const ourRecipe = await recipe.json();
-        if (!recipe.ok) throw new Error(`${data.message} (${recipe.status})`);
-        const res = ourRecipe.data.recipe;
-        state.recipe = {
-            id: res.id,
-            title: res.title,
-            publisher: res.publisher,
-            sourceUrl: res.source_url,
-            image: res.image_url,
-            servings: res.servings,
-            cookingTime: res.cooking_time,
-            ingredients: res.ingredients
-        };
-        console.log(state.recipe);
-    } catch (err) {
-        alert(err);
-    }
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dRlYE":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-var _iconsSvg = require("../../img/icons.svg");
-var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
-var _fractional = require("fractional");
-class Recipe {
-    #parentEl = document.querySelector("recipe");
-    #data;
-    render(data) {
-        this.#data = data;
-        const html = this.#generateMarkup();
-        this.#clear;
-        this.#parentEl.insertAdjacentHTML("afterbegin", html);
-    }
-    showSpinner = ()=>{
-        const html = `
-  <div class="spinner">
-            <svg>
-              <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
-            </svg>
-          </div> 
-  `;
-        this.#parentEl.innerHtml = "";
-        this.#parentEl.insertAdjacentHTML("afterbegin", html);
+},{}],"gkKU3":[function(require,module,exports) {
+exports.interopDefault = function(a) {
+    return a && a.__esModule ? a : {
+        default: a
     };
-     #clear() {
-        this.#parentEl.innerHTML = "";
-    }
-     #generateMarkup() {
-        return `
-    <figure class="recipe__fig">
-          <img src="${this.#data.image}" alt="${this.#data.title}" class="recipe__img" />
-          <h1 class="recipe__title">
-            <span>${this.#data.title}</span>
-          </h1>
-        </figure>
+};
+exports.defineInteropFlag = function(a) {
+    Object.defineProperty(a, "__esModule", {
+        value: true
+    });
+};
+exports.exportAll = function(source, dest) {
+    Object.keys(source).forEach(function(key) {
+        if (key === "default" || key === "__esModule" || dest.hasOwnProperty(key)) return;
+        Object.defineProperty(dest, key, {
+            enumerable: true,
+            get: function() {
+                return source[key];
+            }
+        });
+    });
+    return dest;
+};
+exports.export = function(dest, destName, get) {
+    Object.defineProperty(dest, destName, {
+        enumerable: true,
+        get: get
+    });
+};
 
-        <div class="recipe__details">
-          <div class="recipe__info">
-            <svg class="recipe__info-icon">
-              <use href="${0, _iconsSvgDefault.default}#icon-clock"></use>
-            </svg>
-            <span class="recipe__info-data recipe__info-data--minutes">${this.#data.cookingTime}</span>
-            <span class="recipe__info-text">minutes</span>
-          </div>
-          <div class="recipe__info">
-            <svg class="recipe__info-icon">
-              <use href="${0, _iconsSvgDefault.default}#icon-users"></use>
-            </svg>
-            <span class="recipe__info-data recipe__info-data--people">${this.#data.servings}</span>
-            <span class="recipe__info-text">servings</span>
-
-            <div class="recipe__info-buttons">
-              <button class="btn--tiny btn--increase-servings">
-                <svg>
-                  <use href="${0, _iconsSvgDefault.default}#icon-minus-circle"></use>
-                </svg>
-              </button>
-              <button class="btn--tiny btn--increase-servings">
-                <svg>
-                  <use href="${0, _iconsSvgDefault.default}#icon-plus-circle"></use>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="recipe__user-generated">
-            <svg>
-              <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
-            </svg>
-          </div>
-          <button class="btn--round">
-            <svg class="">
-              <use href="${0, _iconsSvgDefault.default}#icon-bookmark-fill"></use>
-            </svg>
-          </button>
-        </div>
-       
-        <div class="recipe__ingredients">
-          <h2 class="heading--2">Recipe ingredients</h2>
-          <ul class="recipe__ingredient-list">
-          ${this.#data.ingredients.map(this.#gIng(ing)).join("")}
-          </ul>
-        </div>
-
-        <div class="recipe__directions">
-          <h2 class="heading--2">How to cook it</h2>
-          <p class="recipe__directions-text">
-            This recipe was carefully designed and tested by
-            <span class="recipe__publisher">${this.#data.publisher}</span>. Please check out
-            directions at their website.
-          </p>
-          <a
-            class="btn--small recipe__btn"
-            href="${this.#data.sourceUrl}"
-            target="_blank"
-          >
-            <span>Directions</span>
-            <svg class="search__icon">
-              <use href="${0, _iconsSvgDefault.default}#icon-arrow-right"></use>
-            </svg>
-          </a>
-        </div>
-    `;
-    }
-     #gIng(ing) {
-        return `
-  <li class="recipe__ingredient">
-      <svg class="recipe__icon">
-        <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
-      </svg>
-      <div class="recipe__quantity">${ing.quantity ? new (0, _fractional.Fraction)(ing.quantity).toString() : ""}</div>
-      <div class="recipe__description">
-        <span class="recipe__unit">${ing.unit}</span>
-       ${ing.description}
-      </div>
-</li>
-`;
-    }
-}
-exports.default = new Recipe();
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../../img/icons.svg":"cMpiy","fractional":"3SU56"}],"cMpiy":[function(require,module,exports) {
+},{}],"cMpiy":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("hWUTQ") + "icons.21bad73c.svg" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {
