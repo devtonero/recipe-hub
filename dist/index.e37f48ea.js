@@ -2428,7 +2428,7 @@ const loadRecipe = async (id)=>{
             cookingTime: res.cooking_time,
             ingredients: res.ingredients
         };
-        console.log(mystate.res);
+        console.log(mystate.recipe);
     } catch (err) {
         alert(err);
     }
@@ -2446,7 +2446,7 @@ class RecipeV {
     render(data) {
         this.#data = data;
         const html = this.#generateMarkup();
-        this.#clear;
+        this.#clear();
         this.#parentEl.insertAdjacentHTML("afterbegin", html);
     }
     showSpinner = ()=>{
@@ -2457,7 +2457,7 @@ class RecipeV {
             </svg>
           </div>
   `;
-        this.#parentEl.innerHtml = "";
+        this.#clear();
         this.#parentEl.insertAdjacentHTML("afterbegin", html);
     };
      #clear() {
@@ -2516,20 +2516,7 @@ class RecipeV {
             <div class="recipe__ingredients">
               <h2 class="heading--2">Recipe ingredients</h2>
               <ul class="recipe__ingredient-list">
-              ${this.#data.ingredients.map((ing)=>{
-            return `
-              <li class="recipe__ingredient">
-       <svg class="recipe__icon">
-         <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
-       </svg>
-       <div class="recipe__quantity">${ing.quantity ? new (0, _fractional.Fraction)(ing.quantity).toString() : ""}</div>
-       <div class="recipe__description">
-         <span class="recipe__unit">${ing.unit}</span>
-        ${ing.description}
-       </div>
- </li>
-              `;
-        }).join("")}
+              ${this.#data.ingredients.map(this.#gIng).join("")}
               </ul>
             </div>
     
@@ -2552,6 +2539,20 @@ class RecipeV {
               </a>
             </div>
         `;
+    }
+     #gIng(ing) {
+        return `
+    <li class="recipe__ingredient">
+        <svg class="recipe__icon">
+          <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
+        </svg>
+        <div class="recipe__quantity">${ing.quantity ? new (0, _fractional.Fraction)(ing.quantity).toString() : ""}</div>
+        <div class="recipe__description">
+          <span class="recipe__unit">${ing.unit}</span>
+         ${ing.description}
+        </div>
+  </li>
+  `;
     }
 }
 exports.default = new RecipeV();
