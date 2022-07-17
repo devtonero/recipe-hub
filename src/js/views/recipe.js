@@ -1,50 +1,33 @@
-import icon from '../../img/icons.svg';
 import { Fraction } from 'fractional';
+import View from './parent-view';
+import icon from 'url:../../img/icons.svg';
 
-class RecipeV {
-  #parentEl = document.querySelector('.recipe');
-  #data;
+class RecipeV extends View {
+  _parentEl = document.querySelector('.recipe');
+  _errorMessage = 'We Could not Find the Recipe, Please try Another One';
+  _message = '';
 
-  render(data) {
-    this.#data = data;
-    const html = this.#generateMarkup();
-    this.#clear();
-    this.#parentEl.insertAdjacentHTML('afterbegin', html);
+  handleEvent(event) {
+    ['load', 'hashchange'].forEach(ev => window.addEventListener(ev, event));
   }
-  showSpinner = () => {
-    const html = `
-  <div class="spinner">
-            <svg>
-              <use href="${icon}#icon-loader"></use>
-            </svg>
-          </div>
-  `;
-    this.#clear();
-    this.#parentEl.insertAdjacentHTML('afterbegin', html);
-  };
-
-  #clear() {
-    this.#parentEl.innerHTML = '';
-  }
-
-  #generateMarkup() {
+  _generateMarkup() {
     return `
     <figure class="recipe__fig">
-         <img src="${this.#data.image}" alt="${
-      this.#data.title
+         <img src="${this._data.image}" alt="${
+      this._data.title
     }" class="recipe__img" />
               <h1 class="recipe__title">
-                <span>${this.#data.title}</span>
+                <span>${this._data.title}</span>
               </h1>
             </figure>
     
             <div class="recipe__details">
               <div class="recipe__info">
                 <svg class="recipe__info-icon">
-                  <use href="${icon}#icon-clock"></use>
+                  <use href="${icon}_icon-clock"></use>
                 </svg>
                 <span class="recipe__info-data recipe__info-data--minutes">${
-                  this.#data.cookingTime
+                  this._data.cookingTime
                 }</span>
                 <span class="recipe__info-text">minutes</span>
               </div>
@@ -53,7 +36,7 @@ class RecipeV {
                   <use href="${icon}#icon-users"></use>
                 </svg>
                 <span class="recipe__info-data recipe__info-data--people">${
-                  this.#data.servings
+                  this._data.servings
                 }</span>
                 <span class="recipe__info-text">servings</span>
     
@@ -72,9 +55,7 @@ class RecipeV {
               </div>
     
               <div class="recipe__user-generated">
-                <svg>
-                  <use href="${icon}#icon-user"></use>
-                </svg>
+               
               </div>
               <button class="btn--round">
                 <svg class="">
@@ -86,7 +67,7 @@ class RecipeV {
             <div class="recipe__ingredients">
               <h2 class="heading--2">Recipe ingredients</h2>
               <ul class="recipe__ingredient-list">
-              ${this.#data.ingredients.map(this.#gIng).join('')}
+              ${this._data.ingredients.map(this._gIng).join('')}
               </ul>
             </div>
     
@@ -95,28 +76,28 @@ class RecipeV {
               <p class="recipe__directions-text">
                 This recipe was carefully designed and tested by
                 <span class="recipe__publisher">${
-                  this.#data.publisher
+                  this._data.publisher
                 }</span>. Please check out
                 directions at their website.
               </p>
               <a
                 class="btn--small recipe__btn"
-                href="${this.#data.sourceUrl}"
+                href="${this._data.sourceUrl}"
                 target="_blank"
               >
                 <span>Directions</span>
                 <svg class="search__icon">
-                  <use href="${icon}#icon-arrow-right"></use>
+                  <use href="${icon}_icon-arrow-right"></use>
                 </svg>
               </a>
             </div>
         `;
   }
-  #gIng(ing) {
+  _gIng(ing) {
     return `
     <li class="recipe__ingredient">
         <svg class="recipe__icon">
-          <use href="${icon}#icon-check"></use>
+          <use href="${icon}_icon-check"></use>
         </svg>
         <div class="recipe__quantity">${
           ing.quantity ? new Fraction(ing.quantity).toString() : ''
