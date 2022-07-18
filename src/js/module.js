@@ -61,3 +61,7 @@ export const getResultPage = (page = mystate.search.page) => {
   const stop = page * mystate.search.resPerPage;
   return mystate.search.results.slice(start, stop);
 };
+
+export const updateServings = ()=>{
+
+}

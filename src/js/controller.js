@@ -1,7 +1,13 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 
-import { mystate, loadRecipe, searchRecipe, getResultPage } from './module';
+import {
+  mystate,
+  loadRecipe,
+  searchRecipe,
+  getResultPage,
+  updateServings,
+} from './module';
 
 import RecipeV from './views/recipe';
 import SearchV from './views/search';
@@ -42,7 +48,7 @@ const controlSearch = async () => {
 
     //rendering the markup
     // ResultV.render(mystate.search.results);
-    ResultV.render(getResultPage(2));
+    ResultV.render(getResultPage());
 
     //render pagination
     PaginationV.render(mystate.search);
@@ -50,9 +56,26 @@ const controlSearch = async () => {
     console.log(error);
   }
 };
+
+const controlPagination = toPage => {
+  console.log(`${toPage} WAS CLICKED`);
+
+  //render new markup
+  ResultV.render(getResultPage(toPage));
+
+  //render new pagination
+  PaginationV.render(mystate.search);
+};
+
+controlServings = () => {
+  // upadte the recipe serving (in state)
+  updateServings();
+  //update the recipe view
+};
 const init = () => {
   RecipeV.handleEvent(showRecipe);
   SearchV.handleSearch(controlSearch);
+  PaginationV.handlerbuttonClick(controlPagination);
 };
 init();
 //['load', 'hashchange'].forEach(ev => window.addEventListener(ev, showRecipe));
